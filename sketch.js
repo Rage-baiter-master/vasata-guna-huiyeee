@@ -3,8 +3,6 @@ let bat = {
   y: 0
 };
 
-
-// Boss properties type shii
 let boss = {
   x: 240,
   y: 180,
@@ -13,12 +11,12 @@ let boss = {
   maxHealth: 15,
   spawnTime: 0,
   lastDrainTime: 0,
-  lastSpawnedAtScore:0
+  lastSpawnedAtScore: 0
 };
 
-let score =1;
+let score = 1;
 let spawnTime = 0;
-let batDuration = 1500; // ona and a half seconds per bat
+let batDuration = 1500; // 1.5 seconds per bat
 
 function setup() {
   createCanvas(480, 360);
@@ -38,13 +36,14 @@ function spawnBoss() {
   boss.y = height / 2 - 20;
   boss.spawnTime = millis();
   boss.lastDrainTime = millis();
+  boss.lastSpawnedAtScore = score;
 }
 
 function draw() {
-  // --- 1.  BACKGROUND ---
+  // --- 1. BACKGROUND ---
   background(10, 5, 25);
 
-  // --- 2. CUSTOM SHIIII(Stars, Moon, Graveyard) ---
+  // --- 2. CUSTOM ENVIRONMENT (Stars, Moon, Graveyard) ---
   fill(255, 255, 200, 150);
   noStroke();
   ellipse(80, 50, 3, 3);
@@ -79,10 +78,12 @@ function draw() {
   }
 
   // --- 4. CHECK FOR BOSS ---
-  if (!boss.active && score%10==0) {
+  // Only spawn when score is positive, divisible by 10, and hasn't already spawned for this score
+  if (!boss.active && score > 0 && score % 10 === 0 && boss.lastSpawnedAtScore !== score) {
     spawnBoss();
   }
-   // --- 5. GAMEPLAY LOGIC TYPE SHII (Boss vs Normal Bat) ---
+
+  // --- 5. GAMEPLAY LOGIC (Boss vs Normal Bat) ---
   if (boss.active) {
     // Every second the boss is on screen, lose 2 points
     if (millis() - boss.lastDrainTime > 1000) {
@@ -167,8 +168,9 @@ function drawBoss(x, y) {
 function mousePressed() {
   // Restart the game if on Game Over screen
   if (score < 0) {
-    score = 0;
+    score = 1;
     boss.active = false;
+    boss.lastSpawnedAtScore = 0;
     spawnNewBat();
     return;
   }
@@ -180,12 +182,12 @@ function mousePressed() {
       
       // Check if Boss is defeated
       if (boss.health <= 0) {
-        score = score * 2; // Double current score reward!
+        score = score * 2; // Double current score reward
         boss.active = false; // Boss defeated
         spawnNewBat();
       }
     } else {
-      // Missing the boss also costs a point
+      // Missing the boss costs a point
       score--;
     }
   } 
